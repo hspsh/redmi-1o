@@ -1,0 +1,33 @@
+[package]
+name = "zabka-esp"
+version = "0.1.0"
+authors = ["CritBit <Jakub.Sadowski1@gmail.com>"]
+edition = "2021"
+resolver = "2"
+rust-version = "1.77"
+
+[[bin]]
+name = "zabka-esp"
+harness = false # do not use the built in cargo test harness -> resolve rust-analyzer errors
+
+[profile.release]
+opt-level = "s"
+
+[profile.dev]
+debug = true    # Symbols are nice and they don't increase the size on Flash
+opt-level = "z"
+
+[features]
+default = []
+
+experimental = ["esp-idf-svc/experimental"]
+
+[dependencies]
+log = "0.4"
+esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-driver", "embassy-sync"] }
+hmac = "0.12.1"
+qrcode = "0.14.1"
+sha1 = "0.10.6"
+
+[build-dependencies]
+embuild = "0.33"
