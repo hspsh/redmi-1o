@@ -1,4 +1,7 @@
 mod qr_generator;
+mod display;
+
+use display::Display;
 
 const fn hex_to_bytes(hex: &str) -> [u8; 32] {
     let mut bytes = [0u8; 32];
@@ -34,6 +37,11 @@ fn main() {
     esp_idf_svc::log::EspLogger::initialize_default();
 
     log::info!("Hello, world!");
+
+    // Initialize the display
+    // let mut display = display::init_display().expect("Failed to initialize display");
+    // display.clear().expect("Failed to clear display");
+    // display.show_text("Zabka ESP", 0, 0).expect("Failed to show text");
 
     qr_generator::run_qr_generator(&SECRET_HEX, USERID);
 }

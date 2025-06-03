@@ -28,6 +28,10 @@ esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-
 hmac = "0.12.1"
 qrcode = "0.14.1"
 sha1 = "0.10.6"
+embedded-graphics = "0.8.1"
+ssd1306 = "0.10.0"
+esp-idf-hal = "0.45.2"
+display-interface = "0.4.1"
 
 [build-dependencies]
 embuild = "0.33"

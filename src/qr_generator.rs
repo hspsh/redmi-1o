@@ -40,7 +40,7 @@ fn make_qr(totp: u32, userid: &str) -> Result<(), &'static str> {
         userid, totp
     );
 
-    let code = QrCode::with_error_correction_level(url.as_bytes(), EcLevel::Q)
+    let code = QrCode::with_error_correction_level(url.as_bytes(), EcLevel::L)
         .map_err(|_| "QR gen failed")?;
 
     let string = code
