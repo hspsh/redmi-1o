@@ -16,10 +16,7 @@ fn extract_int_from_bytes(arr: &[u8], index: usize) -> u32 {
     u32::from_be_bytes(bytes)
 }
 
-fn calculate_totp(_secret_hex: &str) -> u32 {
-    // set to empty
-    let secret: [u8; 32] = [0; 32];
-
+fn calculate_totp(secret_hex: &[u8;32]) -> u32 {
     let ts = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .expect("Time went backwards")
@@ -28,7 +25,7 @@ fn calculate_totp(_secret_hex: &str) -> u32 {
 
     let msg = ts.to_be_bytes();
 
-    let mut mac = HmacSha1::new_from_slice(&secret).expect("HMAC can take key of any size");
+    let mut mac = HmacSha1::new_from_slice(secret_hex).expect("HMAC can take key of any size");
     mac.update(&msg);
     let output_bytes = mac.finalize().into_bytes();
 
@@ -57,10 +54,12 @@ fn make_qr(totp: u32, userid: &str) -> Result<(), &'static str> {
     Ok(())
 }
 
-pub fn run_qr_generator(secret_hex: &str, userid: &str) {
+pub fn run_qr_generator(secret_hex: &[u8;32], userid: &str) {
     loop {
-        let _res = make_qr(calculate_totp(secret_hex), userid);
-        println!("{}", calculate_totp(secret_hex));
+        let totp = calculate_totp(secret_hex);
+        println!("{}", totp);
+        
+        let _res = make_qr(totp, userid);
         thread::sleep(Duration::from_secs(2));
     }
 }
