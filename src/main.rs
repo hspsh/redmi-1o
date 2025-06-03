@@ -1,35 +1,30 @@
-
-
-
-use std::mem::zeroed;
-use std::time::{SystemTime, UNIX_EPOCH, Duration};
-use std::thread;
 use hmac::{Hmac, Mac};
-use sha1::Sha1;
-use qrcode::{QrCode, EcLevel};
 use qrcode::render::unicode;
+use qrcode::{EcLevel, QrCode};
+use sha1::Sha1;
+use std::thread;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 type HmacSha1 = Hmac<Sha1>;
 
 const JAVA_INT_MAX: u32 = 2_147_483_647;
 
-fn c(arr: &[u8], index: usize) -> u32 {
-    let mut result: u32 = 0;
-    for i in index..index + 4 {
-        result = (result << 8) | (arr[i] as u32 & 0xFF);
-    }
-    result
+fn extract_int_from_bytes(arr: &[u8], index: usize) -> u32 {
+    let bytes: [u8; 4] = arr[index..index + 4]
+        .try_into()
+        .expect("slice with incorrect length");
+    u32::from_be_bytes(bytes)
 }
 
-fn calculate_totp(secret_hex: &str) -> u32 {
-
+fn calculate_totp(_secret_hex: &str) -> u32 {
     // set to empty
     let secret: [u8; 32] = [0; 32];
 
     let ts = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .expect("Time went backwards")
-        .as_secs() / 30;
+        .as_secs()
+        / 30;
 
     let msg = ts.to_be_bytes();
 
@@ -38,9 +33,7 @@ fn calculate_totp(secret_hex: &str) -> u32 {
     let output_bytes = mac.finalize().into_bytes();
 
     let offset = (output_bytes[output_bytes.len() - 1] & 0x0f) as usize;
-    let magic_number = (c(&output_bytes, offset) & JAVA_INT_MAX) % 1_000_000;
-
-    return magic_number
+    (extract_int_from_bytes(&output_bytes, offset) & JAVA_INT_MAX) % 1_000_000
 }
 
 fn make_qr(totp: u32, userid: &str) -> Result<(), &'static str> {
@@ -64,8 +57,7 @@ fn make_qr(totp: u32, userid: &str) -> Result<(), &'static str> {
     Ok(())
 }
 
-fn main(){
-
+fn main() {
     // It is necessary to call this function once. Otherwise some patches to the runtime
     // implemented by esp-idf-sys might not link properly. See https://github.com/esp-rs/esp-idf-template/issues/71
     esp_idf_svc::sys::link_patches();
@@ -75,11 +67,10 @@ fn main(){
 
     log::info!("Hello, world!");
 
-
     let secret_hex = ""; // paySecret
     let userid = ""; // your żappka user id/ployId
-    loop{
-        make_qr(calculate_totp(secret_hex), userid);
+    loop {
+        let _res = make_qr(calculate_totp(secret_hex), userid);
         println!("{}", calculate_totp(secret_hex));
         thread::sleep(Duration::from_secs(2));
     }
