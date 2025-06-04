@@ -32,10 +32,11 @@ embassy = ["esp-idf-svc/embassy-sync", "esp-idf-svc/critical-section", "esp-idf-
 log = "0.4"
 esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-driver", "embassy-sync"] }
 hmac = "0.12.1"
-qrcode = "0.14.1"
 sha1 = "0.10.6"
+rand = "0.8.5"
 
 ssd1306-i2c = { path = "./lib/ssd1306-i2c" }
+qrcode = { path = "./lib/qrcode"}
 
 embedded-graphics = "0.8.1"  # latest is 0.8.1
 # ssd1306-i2c = { version = "0.1"}

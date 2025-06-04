@@ -1,9 +1,14 @@
+use embedded_graphics::image::{Image, ImageDrawable, ImageRaw, ImageRawLE};
+use embedded_graphics::pixelcolor::BinaryColor;
 use hmac::{Hmac, Mac};
-use qrcode::render::unicode;
+use qrcode::render::{image, unicode};
 use qrcode::{EcLevel, QrCode};
 use sha1::Sha1;
 use std::thread;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
+
+// use image::color::Luma;
+
 
 type HmacSha1 = Hmac<Sha1>;
 
@@ -33,8 +38,7 @@ fn calculate_totp(secret_hex: &[u8;32]) -> u32 {
     (extract_int_from_bytes(&output_bytes, offset) & JAVA_INT_MAX) % 1_000_000
 }
 
-fn make_qr(totp: u32, userid: &str) -> Result<(), &'static str> {
-    // todo: add loyal support and detection
+fn make_qr_str(totp: u32, userid: &str) -> Result<String, &'static str> {
     let url = format!(
         "https://srln.pl/view/dashboard?ploy={}&pay={:06}",
         userid, totp
@@ -43,15 +47,25 @@ fn make_qr(totp: u32, userid: &str) -> Result<(), &'static str> {
     let code = QrCode::with_error_correction_level(url.as_bytes(), EcLevel::L)
         .map_err(|_| "QR gen failed")?;
 
-    let string = code
-        .render::<unicode::Dense1x2>()
+    let image = code.render::<char>()
+        .dark_color('.')
         .quiet_zone(false)
         .module_dimensions(1, 1)
         .build();
 
-    println!("{}", string);
+    Ok(image)
+}
 
-    Ok(())
+// fn make_qr_buffer(totp: u32, userid: &str) -> [u8; 1024] {
+//     let dots = make_qr(totp, userid).unwrap_or_else(|_| "QR gen failed".to_string());
+
+//     let mut buffer = [0u8; 1024];
+    
+// }
+
+pub fn get_qr_str(secret_hex: &[u8;32], userid: &str) -> Result<String, &'static str> {
+    let totp = calculate_totp(secret_hex);
+    make_qr_str(totp, userid)
 }
 
 pub fn run_qr_generator(secret_hex: &[u8;32], userid: &str) {
@@ -59,7 +73,9 @@ pub fn run_qr_generator(secret_hex: &[u8;32], userid: &str) {
         let totp = calculate_totp(secret_hex);
         println!("{}", totp);
         
-        let _res = make_qr(totp, userid);
+        if let Ok(qr) = make_qr_str(totp, userid) {
+            println!("{}", qr);
+        }
         thread::sleep(Duration::from_secs(2));
     }
 }
