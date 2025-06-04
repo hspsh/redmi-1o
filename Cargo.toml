@@ -18,9 +18,15 @@ debug = true    # Symbols are nice and they don't increase the size on Flash
 opt-level = "z"
 
 [features]
-default = []
+default = ["std", "embassy", "esp-idf-svc/native"]
 
+pio = ["esp-idf-svc/pio"]
+std = ["alloc", "esp-idf-svc/binstart", "esp-idf-svc/std"]
+alloc = ["esp-idf-svc/alloc"]
+nightly = ["esp-idf-svc/nightly"]
 experimental = ["esp-idf-svc/experimental"]
+embassy = ["esp-idf-svc/embassy-sync", "esp-idf-svc/critical-section", "esp-idf-svc/embassy-time-driver"]
+
 
 [dependencies]
 log = "0.4"
@@ -28,10 +34,12 @@ esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-
 hmac = "0.12.1"
 qrcode = "0.14.1"
 sha1 = "0.10.6"
-embedded-graphics = "0.8.1"
-ssd1306 = "0.10.0"
+
+ssd1306-i2c = { path = "./lib/ssd1306-i2c" }
+
+embedded-graphics = "0.8.1"  # latest is 0.8.1
+# ssd1306-i2c = { version = "0.1"}
 esp-idf-hal = "0.45.2"
-display-interface = "0.4.1"
 
 [build-dependencies]
 embuild = "0.33"
