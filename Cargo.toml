@@ -34,6 +34,7 @@ esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-
 hmac = "0.12.1"
 sha1 = "0.10.6"
 rand = "0.8.5"
+heapless = "0.8.0"
 
 ssd1306-i2c = { path = "./lib/ssd1306-i2c" }
 qrcode = { path = "./lib/qrcode"}
@@ -41,6 +42,7 @@ qrcode = { path = "./lib/qrcode"}
 embedded-graphics = "0.8.1"  # latest is 0.8.1
 # ssd1306-i2c = { version = "0.1"}
 esp-idf-hal = "0.45.2"
+anyhow = "1.0"
 
 [build-dependencies]
 embuild = "0.33"
