@@ -1,6 +1,6 @@
 //! SSD1306 I2C Interface
 
-use embedded_hal::{delay::DelayNs, i2c::I2c, i2c::ErrorType};
+use embedded_hal::{delay::DelayNs, i2c::ErrorType, i2c::I2c};
 
 use super::DisplayInterface;
 use crate::{command::Page, Error};
@@ -24,7 +24,7 @@ where
 impl<I2C> DisplayInterface for I2cInterface<I2C>
 // where
 //     I2C: hal::blocking::i2c::Write<Error = CommE>,
-where 
+where
     I2C: I2c + ErrorType,
 {
     type Error = Error;
@@ -38,15 +38,23 @@ where
         let mut writebuf: [u8; 8] = [0; 8];
         writebuf[1..=cmds.len()].copy_from_slice(&cmds);
         if (cmds.len() == 1) {
-            log::debug!("send_command : length = {} {:#04x}", cmds.len(), cmds[0]);
+            log::debug!(
+                "send_command : length = {} {:#04x}",
+                cmds.len(),
+                cmds[0]
+            );
         } else if (cmds.len() > 1) {
-            log::debug!("send_command : length = {} {:#04x} {:#04x}", cmds.len(), cmds[0], cmds[1]);
+            log::debug!(
+                "send_command : length = {} {:#04x} {:#04x}",
+                cmds.len(),
+                cmds[0],
+                cmds[1]
+            );
         }
-        
+
         //log::debug!("send_commands, length = {}, command id = {:#04x}", cmds.len(), cmds[0]);
-        Ok(self.i2c
-            .write(self.addr, &writebuf[..=cmds.len()])?)
-            //.map_err(Error::Comm)
+        Ok(self.i2c.write(self.addr, &writebuf[..=cmds.len()])?)
+        //.map_err(Error::Comm)
     }
 
     fn send_data(&mut self, buf: &[u8]) -> Result<(), Self::Error> {
@@ -71,17 +79,16 @@ where
             // Copy over all data from buffer, leaving the data command byte intact
             writebuf[1..BUFLEN].copy_from_slice(&chunk);
 
-            self.i2c
-                .write(
-                    self.addr,
-                    &[
-                        0x00, // Command
-                        page, // Page address
-                        0x02, // Lower column address
-                        0x10, // Upper column address (always zero, base is 10h)
-                    ],
-                )?;
-                //.map_err(Error::Comm)?;
+            self.i2c.write(
+                self.addr,
+                &[
+                    0x00, // Command
+                    page, // Page address
+                    0x02, // Lower column address
+                    0x10, // Upper column address (always zero, base is 10h)
+                ],
+            )?;
+            //.map_err(Error::Comm)?;
 
             self.i2c.write(self.addr, &writebuf)?; // .map_err(Error::Comm)?;
 
@@ -90,7 +97,4 @@ where
 
         Ok(())
     }
-    
-    
-
 }

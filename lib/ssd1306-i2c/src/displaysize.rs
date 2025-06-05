@@ -1,6 +1,5 @@
 //! Display size
 
-
 /// Display size enumeration
 #[derive(Clone, Copy)]
 pub enum DisplaySize {
@@ -13,7 +12,7 @@ pub enum DisplaySize {
     /// 132 by 64 pixels
     Display132x64,
     /// 72x40
-    Display72x40
+    Display72x40,
 }
 
 impl DisplaySize {
@@ -24,7 +23,7 @@ impl DisplaySize {
             DisplaySize::Display128x64NoOffset => (128, 64),
             DisplaySize::Display128x32 => (128, 32),
             DisplaySize::Display132x64 => (132, 64),
-            DisplaySize::Display72x40 => (72, 40)
+            DisplaySize::Display72x40 => (72, 40),
         }
     }
 
@@ -35,7 +34,7 @@ impl DisplaySize {
             DisplaySize::Display128x64NoOffset => 0,
             DisplaySize::Display128x32 => 2,
             DisplaySize::Display132x64 => 0,
-            DisplaySize::Display72x40 => 23
+            DisplaySize::Display72x40 => 23,
         }
     }
 }

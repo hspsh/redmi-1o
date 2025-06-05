@@ -35,34 +35,36 @@ ssd1306-i2c = { version = "0.1"}
 
 [build-dependencies]
 embuild = "0.31.3"
- 
- 
- */
 
+
+ */
 
 use anyhow::Result;
 
-use esp_idf_hal::{
-    delay::{Ets, FreeRtos}, i2c::{I2cConfig, I2cDriver}, io::Error, prelude::*
-};
 use esp_idf_hal::prelude::Peripherals;
+use esp_idf_hal::{
+    delay::{Ets, FreeRtos},
+    i2c::{I2cConfig, I2cDriver},
+    io::Error,
+    prelude::*,
+};
 
 use esp_idf_sys::{self as _};
 use log::info;
 
 use embedded_graphics::{
-    mono_font::{ascii::FONT_6X10, ascii::FONT_6X13_BOLD, MonoTextStyleBuilder},
-    image::{Image, ImageRawLE},  // not needed for just text
+    image::{Image, ImageRawLE}, // not needed for just text
+    mono_font::{
+        ascii::FONT_6X10, ascii::FONT_6X13_BOLD, MonoTextStyleBuilder,
+    },
     pixelcolor::BinaryColor,
     prelude::*,
     text::{Baseline, Text},
 };
 
-use ssd1306_i2c::{prelude::*, Builder};  // was use sh1106:: ...
-
+use ssd1306_i2c::{prelude::*, Builder}; // was use sh1106:: ...
 
 fn main() -> Result<()> {
-
     // It is necessary to call this function once. Otherwise some patches to the runtime
     // implemented by esp-idf-sys might not link properly. See https://github.com/esp-rs/esp-idf-template/issues/71
     esp_idf_svc::sys::link_patches();
@@ -78,13 +80,13 @@ fn main() -> Result<()> {
     let sda = pins.gpio6; // esp32-c3  has pins.gpio0;
     let scl = pins.gpio7; // esp32-c3  haspins.gpio1;
     let i2c = peripherals.i2c0;
-    let config = I2cConfig::new().baudrate(100.kHz().into());  // works ok at 400 kHz with short bus length
+    let config = I2cConfig::new().baudrate(100.kHz().into()); // works ok at 400 kHz with short bus length
     let i2c_dev = I2cDriver::new(i2c, sda, scl, &config)?;
 
     // create and ssd1306-i2c instance using builder
     let mut display: GraphicsMode<_> = Builder::new()
         .with_size(DisplaySize::Display128x64NoOffset)
-        .with_i2c_addr(0x3d)  // your LCD may used 0x3c the primary address
+        .with_i2c_addr(0x3d) // your LCD may used 0x3c the primary address
         .with_rotation(DisplayRotation::Rotate0)
         .connect_i2c(i2c_dev)
         .into();
@@ -111,30 +113,55 @@ fn main() -> Result<()> {
         .build();
 
     info!("displaying Hello world! on LCD");
-    Text::with_baseline("Hello world!.........", Point::zero(), text_style_bold, Baseline::Top)
-        .draw(&mut display)
-        .unwrap();
+    Text::with_baseline(
+        "Hello world!.........",
+        Point::zero(),
+        text_style_bold,
+        Baseline::Top,
+    )
+    .draw(&mut display)
+    .unwrap();
     info!("displaying Hello Rust! on LCD");
-    Text::with_baseline("Hello Rust!", Point::new(0, 19), text_style, Baseline::Top)
-        .draw(&mut display)
-        .unwrap();
+    Text::with_baseline(
+        "Hello Rust!",
+        Point::new(0, 19),
+        text_style,
+        Baseline::Top,
+    )
+    .draw(&mut display)
+    .unwrap();
 
-    Text::with_baseline("SH1106 crate modified", Point::new(0, 31), text_style, Baseline::Top)
-        .draw(&mut display)
-        .unwrap();
-    Text::with_baseline("for SSD1306 use", Point::new(0, 43), text_style, Baseline::Top)
-        .draw(&mut display)
-        .unwrap();
-    Text::with_baseline("embedded-hal 1.0 !", Point::new(0, 56), text_style, Baseline::Top)
-        .draw(&mut display)
-        .unwrap();
+    Text::with_baseline(
+        "SH1106 crate modified",
+        Point::new(0, 31),
+        text_style,
+        Baseline::Top,
+    )
+    .draw(&mut display)
+    .unwrap();
+    Text::with_baseline(
+        "for SSD1306 use",
+        Point::new(0, 43),
+        text_style,
+        Baseline::Top,
+    )
+    .draw(&mut display)
+    .unwrap();
+    Text::with_baseline(
+        "embedded-hal 1.0 !",
+        Point::new(0, 56),
+        text_style,
+        Baseline::Top,
+    )
+    .draw(&mut display)
+    .unwrap();
 
     display.flush().unwrap();
 
     //******************************/
     loop {
         info!("looping.........");
-        FreeRtos::delay_ms(5000);  // allows watchdog to reset
+        FreeRtos::delay_ms(5000); // allows watchdog to reset
     }
 
     //Ok(())

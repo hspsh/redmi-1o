@@ -49,9 +49,9 @@ pub enum Command {
     Noop,
     /// Enable charge pump
     ChargePump(bool),
-    MemoryMode(u8),  // OJS added this
+    MemoryMode(u8),     // OJS added this
     DeactivateScroll(), // OJS added this
-    Vpp9VSet(), // OJS added this
+    Vpp9VSet(),         // OJS added this
     /// Set addressing mode;  OJS from SSD1306
     AddressMode(AddrMode),
     EnableScroll(bool),
@@ -68,18 +68,48 @@ impl Command {
             Command::Contrast(val) => ([0x81, val, 0, 0, 0, 0, 0], 2),
             Command::AllOn(on) => ([0xA4 | (on as u8), 0, 0, 0, 0, 0, 0], 1),
             Command::Invert(inv) => ([0xA6 | (inv as u8), 0, 0, 0, 0, 0, 0], 1),
-            Command::DisplayOn(on) => ([0xAE | (on as u8), 0, 0, 0, 0, 0, 0], 1),
-            Command::ColumnAddressLow(addr) => ([0xF & addr, 0, 0, 0, 0, 0, 0], 1),
-            Command::ColumnAddressHigh(addr) => ([0x10 | (0xF & addr), 0, 0, 0, 0, 0, 0], 1),
-            Command::PageAddress(start, end) => ([0x22, start as u8, end as u8 ,0, 0, 0, 0], 3),            Command::PageStart(page) => ([0xB0 | (page as u8), 0, 0, 0, 0, 0, 0], 1),
-            Command::StartLine(line) => ([0x40 | (0x3F & line), 0, 0, 0, 0, 0, 0], 1),
-            Command::SegmentRemap(remap) => ([0xA0 | (remap as u8), 0, 0, 0, 0, 0, 0], 1),
+            Command::DisplayOn(on) => {
+                ([0xAE | (on as u8), 0, 0, 0, 0, 0, 0], 1)
+            }
+            Command::ColumnAddressLow(addr) => {
+                ([0xF & addr, 0, 0, 0, 0, 0, 0], 1)
+            }
+            Command::ColumnAddressHigh(addr) => {
+                ([0x10 | (0xF & addr), 0, 0, 0, 0, 0, 0], 1)
+            }
+            Command::PageAddress(start, end) => {
+                ([0x22, start as u8, end as u8, 0, 0, 0, 0], 3)
+            }
+            Command::PageStart(page) => {
+                ([0xB0 | (page as u8), 0, 0, 0, 0, 0, 0], 1)
+            }
+            Command::StartLine(line) => {
+                ([0x40 | (0x3F & line), 0, 0, 0, 0, 0, 0], 1)
+            }
+            Command::SegmentRemap(remap) => {
+                ([0xA0 | (remap as u8), 0, 0, 0, 0, 0, 0], 1)
+            }
             Command::Multiplex(ratio) => ([0xA8, ratio, 0, 0, 0, 0, 0], 2),
-            Command::ReverseComDir(rev) => ([0xC0 | ((rev as u8) << 3), 0, 0, 0, 0, 0, 0], 1),
-            Command::DisplayOffset(offset) => ([0xD3, offset, 0, 0, 0, 0, 0], 2),
+            Command::ReverseComDir(rev) => {
+                ([0xC0 | ((rev as u8) << 3), 0, 0, 0, 0, 0, 0], 1)
+            }
+            Command::DisplayOffset(offset) => {
+                ([0xD3, offset, 0, 0, 0, 0, 0], 2)
+            }
             // Command::ComPinConfig(alt, ) => ([0xDA, 0x02 | ((alt as u8) << 4), 0, 0, 0, 0, 0], 2),
-            Command::ComPinConfig(alt, lr) => ([0xDA, 0x2 | ((alt as u8) << 4) | ((lr as u8) << 5), 0, 0, 0, 0, 0], 2),
-            
+            Command::ComPinConfig(alt, lr) => (
+                [
+                    0xDA,
+                    0x2 | ((alt as u8) << 4) | ((lr as u8) << 5),
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                ],
+                2,
+            ),
+
             Command::DisplayClockDiv(fosc, div) => {
                 ([0xD5, ((0xF & fosc) << 4) | (0xF & div), 0, 0, 0, 0, 0], 2)
             }
@@ -87,15 +117,23 @@ impl Command {
                 [0xD9, ((0xF & phase2) << 4) | (0xF & phase1), 0, 0, 0, 0, 0],
                 2,
             ),
-            Command::VcomhDeselect(level) => ([0xDB, (level as u8) << 4, 0, 0, 0, 0, 0], 2),
+            Command::VcomhDeselect(level) => {
+                ([0xDB, (level as u8) << 4, 0, 0, 0, 0, 0], 2)
+            }
             Command::Noop => ([0xE3, 0, 0, 0, 0, 0, 0], 1),
-            Command::ChargePump(en) => ([0x8D, 0x10 | ((en as u8) << 2), 0, 0, 0, 0, 0], 2),
-            Command::MemoryMode(mode) => ([0x20, mode, 0, 0, 0, 0, 0], 2),  // OJS: added this
-            Command::DeactivateScroll() => ([0x2e, 0, 0 ,0 ,0, 0, 0], 1),  // OJS: added this
-            Command::Vpp9VSet() => ([0x33, 0, 0, 0, 0, 0, 0],1), // OJS: added this
-            Command::AddressMode(mode) => ([0x20, mode as u8, 0, 0, 0, 0, 0], 2),
-            Command::EnableScroll(en) => ([0x2e | (en as u8), 0, 0, 0, 0, 0, 0] ,1),
-         };
+            Command::ChargePump(en) => {
+                ([0x8D, 0x10 | ((en as u8) << 2), 0, 0, 0, 0, 0], 2)
+            }
+            Command::MemoryMode(mode) => ([0x20, mode, 0, 0, 0, 0, 0], 2), // OJS: added this
+            Command::DeactivateScroll() => ([0x2e, 0, 0, 0, 0, 0, 0], 1), // OJS: added this
+            Command::Vpp9VSet() => ([0x33, 0, 0, 0, 0, 0, 0], 1), // OJS: added this
+            Command::AddressMode(mode) => {
+                ([0x20, mode as u8, 0, 0, 0, 0, 0], 2)
+            }
+            Command::EnableScroll(en) => {
+                ([0x2e | (en as u8), 0, 0, 0, 0, 0, 0], 1)
+            }
+        };
 
         // Send command over the interface
         iface.send_commands(&data[0..len])

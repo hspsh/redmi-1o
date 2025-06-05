@@ -1,22 +1,17 @@
 use embedded_graphics::{
-    mono_font::{ascii::FONT_6X10, ascii::FONT_6X13_BOLD, MonoTextStyleBuilder},
+    image::{Image, ImageRawLE},
+    mono_font::{
+        ascii::FONT_6X10, ascii::FONT_6X13_BOLD, MonoTextStyleBuilder,
+    },
     pixelcolor::BinaryColor,
     prelude::*,
     text::{Baseline, Text},
-    image::{Image, ImageRawLE},
-    primitives::{Circle, Line, PrimitiveStyleBuilder, Rectangle, Triangle},
 };
 
-use esp_idf_hal::{
-    delay::FreeRtos,
-    i2c::{I2cConfig, I2cDriver},
-    prelude::*,
-};
+use esp_idf_hal::{delay::FreeRtos, i2c::I2cDriver};
 
 use ssd1306_i2c::{prelude::*, Builder};
-use rand::Rng;
 
-const DISPLAY_TEXT: &str = "SSD1306-I2C";
 const COMPILE_TIME: &str = env!("COMPILE_TIME");
 
 pub struct Display {
@@ -24,7 +19,9 @@ pub struct Display {
 }
 
 impl Display {
-    pub fn new(i2c_dev: I2cDriver<'static>) -> Result<Self, ssd1306_i2c::Error> {
+    pub fn new(
+        i2c_dev: I2cDriver<'static>,
+    ) -> Result<Self, ssd1306_i2c::Error> {
         let mut display: GraphicsMode<_> = Builder::new()
             .with_size(DisplaySize::Display128x64NoOffset)
             .with_i2c_addr(0x3c)
@@ -62,8 +59,13 @@ impl Display {
         )
         .draw(&mut self.display)?;
 
-        Text::with_baseline(COMPILE_TIME, Point::new(32, 39), text_style, Baseline::Top)
-            .draw(&mut self.display)?;
+        Text::with_baseline(
+            COMPILE_TIME,
+            Point::new(32, 39),
+            text_style,
+            Baseline::Top,
+        )
+        .draw(&mut self.display)?;
 
         self.display.flush()?;
         FreeRtos::delay_ms(1000);
@@ -71,14 +73,15 @@ impl Display {
         self.display.clear();
         self.display.flush()?;
 
-        
-
         Ok(())
     }
 
-    pub fn draw_qr_by_str(&mut self, qr_str: &str) -> Result<(), ssd1306_i2c::Error> {
+    pub fn draw_qr_by_str(
+        &mut self,
+        qr_str: &str,
+    ) -> Result<(), ssd1306_i2c::Error> {
         let mut buf = [0u8; 128];
-        
+
         // Process each line of the QR code string
         for (y, line) in qr_str.lines().take(32).enumerate() {
             for (x, ch) in line.chars().take(32).enumerate() {
@@ -93,24 +96,22 @@ impl Display {
         Image::new(&qr_im, Point::new(44, 20))
             .draw(&mut self.display)
             .unwrap();
-            
+
         self.display.flush()?;
         Ok(())
     }
 
-    pub fn clear(&mut self) -> Result<(), ssd1306_i2c::Error> {
-        self.display.clear();
-        self.display.flush()?;
-        Ok(())
-    }
+    // pub fn clear(&mut self) -> Result<(), ssd1306_i2c::Error> {
+    //     self.display.clear();
+    //     self.display.flush()?;
+    //     Ok(())
+    // }
 
-    pub fn flush(&mut self) -> Result<(), ssd1306_i2c::Error> {
-        self.display.flush()?;
-        Ok(())
-    }
+    // pub fn flush(&mut self) -> Result<(), ssd1306_i2c::Error> {
+    //     self.display.flush()?;
+    //     Ok(())
+    // }
 }
-
-
 
 // pub fn scan_i2c_bus(i2c_dev: &mut I2cDriver) {
 //     log::info!("Scanning I2C bus...");

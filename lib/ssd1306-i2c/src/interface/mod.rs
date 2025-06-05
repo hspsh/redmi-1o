@@ -3,8 +3,6 @@
 
 pub mod i2c;
 
-
-
 /// A method of communicating with ssd1306
 pub trait DisplayInterface {
     /// Interface error type

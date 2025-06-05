@@ -1,16 +1,9 @@
-use esp_idf_hal::prelude::*;
 use esp_idf_svc::{
-    nvs::EspDefaultNvsPartition,
-    wifi::EspWifi,
-    eventloop::EspSystemEventLoop,
+    eventloop::EspSystemEventLoop, nvs::EspDefaultNvsPartition, wifi::EspWifi,
 };
 use heapless::String;
 
-use esp_idf_hal::{
-    delay::{Ets, FreeRtos},
-    i2c::{I2cConfig, I2cDriver},
-    prelude::*,
-};
+use esp_idf_hal::delay::FreeRtos;
 
 use anyhow::Result;
 use log::*;
@@ -23,17 +16,21 @@ impl WifiManager {
     pub fn new(modem: esp_idf_hal::modem::Modem) -> Result<Self> {
         let nvs = EspDefaultNvsPartition::take()?;
         let sysloop = EspSystemEventLoop::take()?;
-        let wifi = EspWifi::new(modem, sysloop, None)?;
+        let wifi = EspWifi::new(modem, sysloop, Some(nvs))?;
 
         Ok(Self { wifi })
     }
 
     pub fn connect(&mut self, ssid: &str, password: &str) -> Result<()> {
         let mut config = esp_idf_svc::wifi::ClientConfiguration::default();
-        config.ssid = String::<32>::try_from(ssid).map_err(|_| anyhow::anyhow!("SSID too long"))?;
-        config.password = String::<64>::try_from(password).map_err(|_| anyhow::anyhow!("Password too long"))?;
+        config.ssid = String::<32>::try_from(ssid)
+            .map_err(|_| anyhow::anyhow!("SSID too long"))?;
+        config.password = String::<64>::try_from(password)
+            .map_err(|_| anyhow::anyhow!("Password too long"))?;
 
-        self.wifi.set_configuration(&esp_idf_svc::wifi::Configuration::Client(config))?;
+        self.wifi.set_configuration(
+            &esp_idf_svc::wifi::Configuration::Client(config),
+        )?;
         self.wifi.start()?;
         self.wifi.connect()?;
 
@@ -48,7 +45,7 @@ impl WifiManager {
     pub fn sync_time(&self) -> Result<()> {
         let mut retry = 0;
         while retry < 5 {
-            if let Ok(_) = esp_idf_svc::sntp::EspSntp::new_default() {
+            if esp_idf_svc::sntp::EspSntp::new_default().is_ok() {
                 info!("Time synchronized successfully");
                 return Ok(());
             }
@@ -57,4 +54,4 @@ impl WifiManager {
         }
         Err(anyhow::anyhow!("Failed to sync time"))
     }
-} 
+}

@@ -1,6 +1,6 @@
 //! Buffered display module for use with the [embedded-graphics] crate
 //!
-//! 
+//!
 //! ```rust,no_run
 //! use embedded_graphics::{
 //!     pixelcolor::BinaryColor,
@@ -89,10 +89,7 @@ where
     }
 
     /// Reset display
-    pub fn reset<DELAY>(
-        &mut self,
-        delay: &mut DELAY,
-    ) -> Result<(), Error>
+    pub fn reset<DELAY>(&mut self, delay: &mut DELAY) -> Result<(), Error>
     where
         DELAY: DelayNs,
     {
@@ -150,15 +147,17 @@ where
 
         let (byte, bit) = match display_rotation {
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                let byte =
-                    &mut self.buffer[((y as usize) / 8 * display_width as usize) + (x as usize)];
+                let byte = &mut self.buffer[((y as usize) / 8
+                    * display_width as usize)
+                    + (x as usize)];
                 let bit = 1 << (y % 8);
 
                 (byte, bit)
             }
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                let byte =
-                    &mut self.buffer[((x as usize) / 8 * display_width as usize) + (y as usize)];
+                let byte = &mut self.buffer[((x as usize) / 8
+                    * display_width as usize)
+                    + (y as usize)];
                 let bit = 1 << (x % 8);
 
                 (byte, bit)
@@ -184,7 +183,10 @@ where
     }
 
     /// Set the display rotation
-    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), DI::Error> {
+    pub fn set_rotation(
+        &mut self,
+        rot: DisplayRotation,
+    ) -> Result<(), DI::Error> {
         self.properties.set_rotation(rot)
     }
 

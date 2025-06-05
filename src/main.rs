@@ -1,47 +1,26 @@
-mod qr_generator;
 mod display;
+mod qr_generator;
 mod wifi;
 
+use anyhow::Result;
 use esp_idf_hal::{
-    delay::{Ets, FreeRtos},
+    delay::FreeRtos,
     i2c::{I2cConfig, I2cDriver},
     prelude::*,
 };
-use anyhow::Result;
 
 use crate::qr_generator::get_qr_str;
 use crate::wifi::WifiManager;
 
-const fn hex_to_bytes(hex: &str) -> [u8; 32] {
-    let mut bytes = [0u8; 32];
-    let mut i = 0;
-    let mut j = 0;
-    while i < hex.len() && j < 32 {
-        let byte = match hex.as_bytes()[i] {
-            b'0'..=b'9' => hex.as_bytes()[i] - b'0',
-            b'a'..=b'f' => hex.as_bytes()[i] - b'a' + 10,
-            b'A'..=b'F' => hex.as_bytes()[i] - b'A' + 10,
-            _ => 0,
-        };
-        if i % 2 == 0 {
-            bytes[j] = byte << 4;
-        } else {
-            bytes[j] |= byte;
-            j += 1;
-        }
-        i += 1;
-    }
-    bytes
-}
-
-static SECRET_HEX: [u8; 32] = hex_to_bytes(env!("SECRET_HEX")); // paySecret
+static SECRET_HEX: [u8; 32] = qr_generator::hex_to_bytes(env!("SECRET_HEX")); // paySecret
 static USERID: &str = env!("USER_ID"); // your żappka user id/ployId
 static WIFI_SSID: &str = env!("WIFI_SSID");
 static WIFI_PASS: &str = env!("WIFI_PASS");
 
 fn main() -> Result<()> {
-    // It is necessary to call this function once. Otherwise some patches to the runtime
-    // implemented by esp-idf-sys might not link properly. See https://github.com/esp-rs/esp-idf-template/issues/71
+    // It is necessary to call this function once. Otherwise some patches
+    // to the runtime implemented by esp-idf-sys might not link properly.
+    // See https://github.com/esp-rs/esp-idf-template/issues/71
     esp_idf_svc::sys::link_patches();
 
     // Bind the log crate to the ESP Logging facilities
@@ -56,7 +35,6 @@ fn main() -> Result<()> {
     wifi_manager.connect(WIFI_SSID, WIFI_PASS)?;
     wifi_manager.sync_time()?;
 
-
     let pins = peripherals.pins;
     let sda = pins.gpio5;
     let scl = pins.gpio6;
@@ -68,7 +46,7 @@ fn main() -> Result<()> {
     let mut display = display::Display::new(i2c_dev).unwrap();
     display.show_welcome_screen().unwrap();
 
-    loop{
+    loop {
         let qr_str = get_qr_str(&SECRET_HEX, USERID).unwrap();
 
         display.draw_qr_by_str(&qr_str).unwrap();

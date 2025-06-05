@@ -1,8 +1,7 @@
 //! Container to store and set display properties
 
-
 use crate::{
-    command::{Command, VcomhLevel, AddrMode},
+    command::{AddrMode, Command, VcomhLevel},
     displayrotation::DisplayRotation,
     displaysize::DisplaySize,
     interface::DisplayInterface,
@@ -72,7 +71,7 @@ where
             | DisplaySize::Display128x64NoOffset
             | DisplaySize::Display132x64 => Command::ComPinConfig(true).send(&mut self.iface),
         }?;
-        
+
         Command::Contrast(0x8f).send(&mut self.iface)?;  // OJS: was 0x80
         Command::PreChargePeriod(0x1, 0xf).send(&mut self.iface)?;  // OJS: was 0x1, 0xf
         Command::VcomhDeselect(VcomhLevel::Auto).send(&mut self.iface)?;
@@ -103,13 +102,22 @@ where
         //         | DisplaySize::Display132x64 => Command::ComPinConfig(true).send(&mut self.iface),
         // }?;
         match self.display_size {
-            DisplaySize::Display128x32 => Command::ComPinConfig(false, false).send(&mut self.iface),
-            DisplaySize::Display128x64NoOffset => Command::ComPinConfig(true, false).send(&mut self.iface),
-            DisplaySize::Display128x64 => Command::ComPinConfig(true, false).send(&mut self.iface),
-            DisplaySize::Display132x64 => Command::ComPinConfig(true, false).send(&mut self.iface), // ?
-            DisplaySize::Display72x40 => Command::ComPinConfig(true, false).send(&mut self.iface), // ?
-        } ?;
-
+            DisplaySize::Display128x32 => {
+                Command::ComPinConfig(false, false).send(&mut self.iface)
+            }
+            DisplaySize::Display128x64NoOffset => {
+                Command::ComPinConfig(true, false).send(&mut self.iface)
+            }
+            DisplaySize::Display128x64 => {
+                Command::ComPinConfig(true, false).send(&mut self.iface)
+            }
+            DisplaySize::Display132x64 => {
+                Command::ComPinConfig(true, false).send(&mut self.iface)
+            } // ?
+            DisplaySize::Display72x40 => {
+                Command::ComPinConfig(true, false).send(&mut self.iface)
+            } // ?
+        }?;
 
         log::debug!("init_column_mode, rotation.");
         self.set_rotation(display_rotation)?;
@@ -130,15 +138,23 @@ where
     }
 
     /// Change the display brightness.
-    pub fn set_brightness(&mut self, brightness: Brightness) -> Result<(), DI::Error> {
-        Command::PreChargePeriod(1, brightness.precharge).send(&mut self.iface)?;
+    pub fn set_brightness(
+        &mut self,
+        brightness: Brightness,
+    ) -> Result<(), DI::Error> {
+        Command::PreChargePeriod(1, brightness.precharge)
+            .send(&mut self.iface)?;
         Command::Contrast(brightness.contrast).send(&mut self.iface)
     }
 
     /// Set the position in the framebuffer of the display where any sent data should be
     /// drawn. This method can be used for changing the affected area on the screen as well
     /// as (re-)setting the start point of the next `draw` call.
-    pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), DI::Error> {
+    pub fn set_draw_area(
+        &mut self,
+        start: (u8, u8),
+        end: (u8, u8),
+    ) -> Result<(), DI::Error> {
         self.draw_area_start = start;
         self.draw_area_end = end;
         self.draw_column = start.0;
@@ -175,8 +191,10 @@ where
 
     fn send_draw_address(&mut self) -> Result<(), DI::Error> {
         Command::PageStart(self.draw_row.into()).send(&mut self.iface)?;
-        Command::ColumnAddressLow(0xF & self.draw_column).send(&mut self.iface)?;
-        Command::ColumnAddressHigh(0xF & (self.draw_column >> 4)).send(&mut self.iface)
+        Command::ColumnAddressLow(0xF & self.draw_column)
+            .send(&mut self.iface)?;
+        Command::ColumnAddressHigh(0xF & (self.draw_column >> 4))
+            .send(&mut self.iface)
     }
 
     /// Get the configured display size
@@ -200,7 +218,10 @@ where
     }
 
     /// Set the display rotation
-    pub fn set_rotation(&mut self, display_rotation: DisplayRotation) -> Result<(), DI::Error> {
+    pub fn set_rotation(
+        &mut self,
+        display_rotation: DisplayRotation,
+    ) -> Result<(), DI::Error> {
         self.display_rotation = display_rotation;
 
         match display_rotation {

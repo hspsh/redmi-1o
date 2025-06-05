@@ -1,7 +1,6 @@
 //! ssd1306 I2C OLED display driver
 //!
 
-
 #![no_std]
 #![deny(missing_docs)]
 #![deny(missing_copy_implementations)]
@@ -43,6 +42,9 @@ where
 
 extern crate embedded_hal as hal;
 
+#[doc(hidden)]
+//pub mod test_helpers;
+mod brightness;
 pub mod builder;
 mod command;
 pub mod displayrotation;
@@ -51,9 +53,5 @@ pub mod interface;
 pub mod mode;
 pub mod prelude;
 pub mod properties;
-#[doc(hidden)]
-//pub mod test_helpers;
-
-mod brightness;
 
 pub use crate::builder::Builder;

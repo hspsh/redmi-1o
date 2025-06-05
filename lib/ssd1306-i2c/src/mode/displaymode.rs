@@ -1,6 +1,5 @@
 //! Abstraction of different operating modes for the ssd1306
 
-
 use crate::{interface::DisplayInterface, properties::DisplayProperties};
 
 /// Display mode abstraction
