@@ -1,6 +1,7 @@
 mod display_sh1106;
 mod qr_generator;
 mod wifi;
+mod bit_image;
 
 use anyhow::Result;
 use esp_idf_hal::{
