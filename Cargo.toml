@@ -37,6 +37,7 @@ rand = "0.8.5"
 heapless = "0.8.0"
 
 ssd1306-i2c = { path = "./lib/ssd1306-i2c" }
+sh1106 = { path = "./lib/sh1106" }
 qrcode = { path = "./lib/qrcode"}
 
 embedded-graphics = "0.8.1"  # latest is 0.8.1

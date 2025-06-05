@@ -1,4 +1,4 @@
-mod display;
+mod display_sh1106;
 mod qr_generator;
 mod wifi;
 
@@ -36,14 +36,14 @@ fn main() -> Result<()> {
     wifi_manager.sync_time()?;
 
     let pins = peripherals.pins;
-    let sda = pins.gpio5;
-    let scl = pins.gpio6;
+    let sda = pins.gpio8;
+    let scl = pins.gpio7;
     let i2c = peripherals.i2c0;
     let config = I2cConfig::new().baudrate(100.kHz().into());
     let i2c_dev = I2cDriver::new(i2c, sda, scl, &config)?;
 
     // Initialize display
-    let mut display = display::Display::new(i2c_dev).unwrap();
+    let mut display = display_sh1106::Display::new(i2c_dev).unwrap();
     display.show_welcome_screen().unwrap();
 
     loop {
