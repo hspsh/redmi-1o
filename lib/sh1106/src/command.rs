@@ -124,6 +124,17 @@ pub enum Page {
     Page15 = 15,
     /// Page 16
     Page16 = 16,
+    /// Page 17
+    Page17 = 17,
+    /// Page 18
+    Page18 = 18,
+    /// Page 18
+
+    Page19 = 19,
+    /// Page 18
+
+    Page20 = 20,
+    
 }
 
 impl From<u8> for Page {
@@ -146,6 +157,10 @@ impl From<u8> for Page {
             14 => Page::Page14,
             15 => Page::Page15,
             16 => Page::Page16,
+            17 => Page::Page17,
+            18 => Page::Page18,
+            19 => Page::Page19,
+            20 => Page::Page20,
             _ => panic!("Page too high"),
         }
     }

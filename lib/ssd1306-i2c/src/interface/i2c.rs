@@ -1,6 +1,6 @@
 //! SSD1306 I2C Interface
 
-use embedded_hal::{delay::DelayNs, i2c::ErrorType, i2c::I2c};
+use embedded_hal::{ i2c::ErrorType, i2c::I2c};
 
 use super::DisplayInterface;
 use crate::{command::Page, Error};
@@ -37,13 +37,13 @@ where
         // Copy over given commands to new aray to prefix with command identifier
         let mut writebuf: [u8; 8] = [0; 8];
         writebuf[1..=cmds.len()].copy_from_slice(&cmds);
-        if (cmds.len() == 1) {
+        if cmds.len() == 1 {
             log::debug!(
                 "send_command : length = {} {:#04x}",
                 cmds.len(),
                 cmds[0]
             );
-        } else if (cmds.len() > 1) {
+        } else if cmds.len() > 1 {
             log::debug!(
                 "send_command : length = {} {:#04x} {:#04x}",
                 cmds.len(),

@@ -1,9 +1,9 @@
 use qrcode::render::{Canvas, Pixel};
 
 #[derive(Copy, Clone)]
-struct BitPixel(bool);
+pub struct BitPixel(bool);
 
-struct BitCanvas {
+pub struct BitCanvas {
     data: Vec<u8>,
     width: usize,
     height: usize,
@@ -40,6 +40,20 @@ impl Canvas for BitCanvas {
         self
     }
 
+}
+
+impl BitCanvas {
+    pub fn set_bytearray(&self, buf_ref: &mut [u8]) -> u32 {
+        // Ensure the data length is exactly 128 bytes
+        // assert_eq!(self.data.len(), 128, "Data length must be 128 bytes");
+        // // Convert Vec<u8> to array reference
+        // self.data.as_slice().try_into().expect("Data must be exactly 128 bytes")
+
+        let len = buf_ref.len().min(self.data.len());
+        buf_ref[..len].copy_from_slice(&self.data[..len]);
+
+        self.width as u32
+    }
 }
 
 impl Pixel for BitPixel {

@@ -23,7 +23,7 @@ impl DisplaySize {
             DisplaySize::Display128x64NoOffset => (128, 64),
             DisplaySize::Display128x32 => (128, 32),
             DisplaySize::Display132x64 => (132, 64),
-            DisplaySize::Display128x128 => (128, 128),
+            DisplaySize::Display128x128 => (132, 128),
         }
     }
 
@@ -34,7 +34,7 @@ impl DisplaySize {
             DisplaySize::Display128x64NoOffset => 0,
             DisplaySize::Display128x32 => 2,
             DisplaySize::Display132x64 => 0,
-            DisplaySize::Display128x128 => 0,
+            DisplaySize::Display128x128 => 2,
         }
     }
 }

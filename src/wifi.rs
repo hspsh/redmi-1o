@@ -3,6 +3,9 @@ use esp_idf_svc::{
 };
 use heapless::String;
 
+use esp_idf_svc::sntp::EspSntp;
+
+
 use esp_idf_hal::delay::FreeRtos;
 
 use anyhow::Result;
@@ -53,5 +56,11 @@ impl WifiManager {
             retry += 1;
         }
         Err(anyhow::anyhow!("Failed to sync time"))
+
+        // let sntp = EspSntp::new_default()?;
+        // sntp.set_time_sync_enabled(true)?;
+
+
+
     }
 }

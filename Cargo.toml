@@ -44,6 +44,8 @@ embedded-graphics = "0.8.1"  # latest is 0.8.1
 # ssd1306-i2c = { version = "0.1"}
 esp-idf-hal = "0.45.2"
 anyhow = "1.0"
+time = "0.3.41"
+chrono = "0.4.41"
 
 [build-dependencies]
 embuild = "0.33"

@@ -49,7 +49,7 @@ use crate::{
     mode::displaymode::DisplayModeTrait, properties::DisplayProperties, Error,
 };
 
-const BUFFER_SIZE: usize = 128 * 128 / 8;
+const BUFFER_SIZE: usize = 132 * 128 / 8;
 
 /// Graphics mode handler
 pub struct GraphicsMode<DI>

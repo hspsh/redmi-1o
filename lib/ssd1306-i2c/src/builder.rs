@@ -28,7 +28,7 @@
 //! example, to use [`GraphicsMode` mode](../mode/graphics/struct.GraphicsMode.html):
 //!
 
-use core::marker::PhantomData;
+// use core::marker::PhantomData;
 //use hal::{self, digital::v2::OutputPin};
 use embedded_hal;
 
