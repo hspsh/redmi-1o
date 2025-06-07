@@ -15,7 +15,7 @@ use esp_idf_hal::{
     prelude::*,
 };
 
-use chrono::Local;
+use chrono::{Datelike, Local};
 
 #[allow(unused_imports)]
 use crate::qr_generator::{get_qr, get_qr_str}; //
@@ -57,27 +57,43 @@ fn main() -> Result<()> {
     // Initialize display
     let mut display = display_sh1106::Display::new(i2c_dev).unwrap();
     display
-        .print_metadata(WIFI_SSID.to_string(), COMPILE_TIME.to_string())
+        .print_metadata("connecting to WiFi".to_string(), WIFI_SSID.to_string())
         .unwrap();
 
     let mut wifi_manager = WifiManager::new(peripherals.modem)?;
     wifi_manager.connect(WIFI_SSID, WIFI_PASS)?;
-    wifi_manager.sync_time()?;
+    wifi_manager.init_sync()?;
+
+    wait_sntp_sync(&mut display, 30);
     
     FreeRtos::delay_ms(1000);
 
     loop {
-        // display_totp_meta(&mut display);
-        // FreeRtos::delay_ms(2000);
+        display_totp_meta(&mut display);
+        FreeRtos::delay_ms(2000);
 
-        // display_qr(&mut display);
-        // FreeRtos::delay_ms(10000);
+        display_qr(&mut display);
+        FreeRtos::delay_ms(10000);
 
+    }
+}
+
+fn wait_sntp_sync(display: &mut display_sh1106::Display, _timeout_sec: u64) {
+    loop {
         let now = Local::now();
         let formatted_time = now.format("%Y-%m-%d %H:%M:%S").to_string();
         println!("Current time: {}", formatted_time);
-        FreeRtos::delay_ms(1000);
 
+        display.print_metadata(
+            "wait timesync".to_string(),
+            formatted_time,
+        ).unwrap();
+
+        if now.year() > 2000 {
+            return;
+        }
+
+        FreeRtos::delay_ms(1000);
     }
 }
 
@@ -101,7 +117,9 @@ fn display_qr(display: &mut display_sh1106::Display) {
 fn display_totp_meta(display: &mut display_sh1106::Display) {
     let now = Local::now();
     let time_str = now.format("%Y-%m-%d %H:%M:%S").to_string();
-    let totp = calculate_totp(&SECRET_HEX).to_string();
+    let totp = calculate_totp(&SECRET_HEX);
 
-    display.print_metadata(totp, time_str).unwrap();
+    let totp_str = format!("{:06}", totp);
+
+    display.print_metadata(totp_str, time_str).unwrap();
 }

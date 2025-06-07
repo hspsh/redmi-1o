@@ -70,7 +70,7 @@ impl Display {
 
         Text::with_baseline(
             &totp,
-            Point::new(16, 39),
+            Point::new(3, 39),
             text_style,
             Baseline::Top,
         )

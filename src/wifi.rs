@@ -49,14 +49,8 @@ impl WifiManager {
         Ok(())
     }
 
-    pub fn sync_time(&mut self) -> anyhow::Result<()> {
+    pub fn init_sync(&mut self) -> anyhow::Result<()> {
         if self.sntp.is_none() {
-            let sntp_conf = SntpConf {
-                servers: ["pool.ntp.org"],
-                operating_mode: OperatingMode::Poll,
-                sync_mode: esp_idf_svc::sntp::SyncMode::Smooth,
-            };
-            // let sntp = EspSntp::new(&sntp_conf)?;
             let sntp = EspSntp::new_default()?;
             info!("SNTP initialized");
             self.sntp = Some(sntp);
@@ -64,7 +58,4 @@ impl WifiManager {
         Ok(())
     }
 
-    pub fn get_sntp(&self) -> Option<&EspSntp<'static>> {
-        self.sntp.as_ref()
-    }
 }
