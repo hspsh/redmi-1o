@@ -86,7 +86,7 @@ pub fn get_qr(
     userid: &str,
 ) -> Result<QrCode, &'static str> {
     let totp = calculate_totp(secret_hex);
-    make_qr(totp,userid)
+    make_qr(totp, userid)
 }
 
 pub fn get_qr_str(

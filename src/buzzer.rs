@@ -1,15 +1,10 @@
+use anyhow::Result;
+use esp_idf_hal::gpio::{InputPin, OutputPin};
+use esp_idf_hal::{gpio::Gpio2, ledc::*, peripheral::Peripheral, prelude::*};
 use std::marker::PhantomData;
 use std::sync::mpsc::{self, Sender};
 use std::thread;
 use std::time::Duration;
-use esp_idf_hal::gpio::{InputPin, OutputPin};
-use esp_idf_hal::{
-    gpio::Gpio2,
-    ledc::*,
-    peripheral::Peripheral,
-    prelude::*,
-};
-use anyhow::Result;
 
 pub struct BuzzerTone {
     pub freq_hz: u32,
@@ -26,12 +21,11 @@ impl<'d> Buzzer<'d> {
         io: impl Peripheral<P = impl InputPin + OutputPin> + 'd + 'static,
         ledc: esp_idf_hal::ledc::LEDC,
     ) -> Result<Self> {
-        let config = config::TimerConfig::default().frequency(2000.Hz()).resolution(Resolution::Bits14);
+        let config = config::TimerConfig::default()
+            .frequency(2000.Hz())
+            .resolution(Resolution::Bits14);
         let mut timer = LedcTimerDriver::new(ledc.timer0, &config)?;
-        let mut pwm = LedcDriver::new(
-            ledc.channel0,
-             &timer,
-             io)?;
+        let mut pwm = LedcDriver::new(ledc.channel0, &timer, io)?;
 
         let (tx, rx) = mpsc::channel::<BuzzerTone>();
 
@@ -41,24 +35,39 @@ impl<'d> Buzzer<'d> {
             .spawn(move || {
                 dbg!("Buzzer thread started");
                 while let Ok(tone) = rx.recv() {
-                    dbg!("Buzzer received tone: freq={}Hz, duration={}ms", tone.freq_hz, tone.duration_ms);
+                    log::info!(
+                        "Buzzer received tone: freq={}Hz, duration={}ms",
+                        tone.freq_hz,
+                        tone.duration_ms
+                    );
                     if tone.freq_hz == 0 || tone.duration_ms == 0 {
                         let _ = pwm.set_duty(0);
                         thread::sleep(Duration::from_millis(10));
                         continue;
                     }
-                    timer.set_frequency(tone.freq_hz.Hz()).expect("Failed to set frequency");
+                    timer
+                        .set_frequency(tone.freq_hz.Hz())
+                        .expect("Failed to set frequency");
                     let max_duty = pwm.get_max_duty();
                     let _ = pwm.set_duty(max_duty / 2);
-                    dbg!("Buzzer playing tone: freq={}Hz, duration={}ms", tone.freq_hz, tone.duration_ms);
-                    thread::sleep(Duration::from_millis(tone.duration_ms as u64));
-                    dbg!("stop");
+                    log::info!(
+                        "Buzzer playing tone: freq={}Hz, duration={}ms",
+                        tone.freq_hz,
+                        tone.duration_ms
+                    );
+                    thread::sleep(Duration::from_millis(
+                        tone.duration_ms as u64,
+                    ));
+                    log::info!("stop");
                     let _ = pwm.set_duty(0);
                 }
-                dbg!("Buzzer thread exiting");
+                log::info!("Buzzer thread exiting");
             })?;
 
-        Ok(Buzzer { sender: tx, _p: PhantomData })
+        Ok(Buzzer {
+            sender: tx,
+            _p: PhantomData,
+        })
     }
 
     pub fn enqueue_tones(&self, tones: &[BuzzerTone]) {

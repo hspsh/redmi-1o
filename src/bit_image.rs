@@ -13,14 +13,19 @@ impl Canvas for BitCanvas {
     type Pixel = BitPixel;
     type Image = Self;
 
-    fn new(width: u32, height: u32, dark_pixel: Self::Pixel, light_pixel: Self::Pixel) -> Self {
-        // todo fix 
-        let default_value = 0; 
+    fn new(
+        width: u32,
+        height: u32,
+        dark_pixel: Self::Pixel,
+        light_pixel: Self::Pixel,
+    ) -> Self {
+        // todo fix
+        let default_value = 0;
 
         let width = width.next_multiple_of(8) as usize;
         let height = height as usize;
 
-        dbg!(width, height);
+        // dbg!(width, height);
         let data = vec![default_value; width * height / 8];
 
         Self {
@@ -39,7 +44,6 @@ impl Canvas for BitCanvas {
     fn into_image(self) -> Self::Image {
         self
     }
-
 }
 
 impl BitCanvas {

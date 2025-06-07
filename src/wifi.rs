@@ -1,10 +1,12 @@
 use esp_idf_svc::{
-    eventloop::EspSystemEventLoop, nvs::EspDefaultNvsPartition, wifi::EspWifi,
+    eventloop::EspSystemEventLoop,
+    nvs::EspDefaultNvsPartition,
+    sntp::{OperatingMode, SntpConf},
+    wifi::EspWifi,
 };
 use heapless::String;
 
 use esp_idf_svc::sntp::EspSntp;
-
 
 use esp_idf_hal::delay::FreeRtos;
 
@@ -13,6 +15,7 @@ use log::*;
 
 pub struct WifiManager {
     wifi: EspWifi<'static>,
+    sntp: Option<EspSntp<'static>>,
 }
 
 impl WifiManager {
@@ -21,7 +24,7 @@ impl WifiManager {
         let sysloop = EspSystemEventLoop::take()?;
         let wifi = EspWifi::new(modem, sysloop, Some(nvs))?;
 
-        Ok(Self { wifi })
+        Ok(Self { wifi, sntp: None })
     }
 
     pub fn connect(&mut self, ssid: &str, password: &str) -> Result<()> {
@@ -38,29 +41,30 @@ impl WifiManager {
         self.wifi.connect()?;
 
         while !self.wifi.is_connected()? {
-            FreeRtos::delay_ms(100);
+            FreeRtos::delay_ms(1000);
+            log::info!("dupa");
         }
 
-        info!("Connected to WiFi");
+        log::info!("Connected to WiFi");
         Ok(())
     }
 
-    pub fn sync_time(&self) -> Result<()> {
-        let mut retry = 0;
-        while retry < 5 {
-            if esp_idf_svc::sntp::EspSntp::new_default().is_ok() {
-                info!("Time synchronized successfully");
-                return Ok(());
-            }
-            FreeRtos::delay_ms(1000);
-            retry += 1;
+    pub fn sync_time(&mut self) -> anyhow::Result<()> {
+        if self.sntp.is_none() {
+            let sntp_conf = SntpConf {
+                servers: ["pool.ntp.org"],
+                operating_mode: OperatingMode::Poll,
+                sync_mode: esp_idf_svc::sntp::SyncMode::Smooth,
+            };
+            // let sntp = EspSntp::new(&sntp_conf)?;
+            let sntp = EspSntp::new_default()?;
+            info!("SNTP initialized");
+            self.sntp = Some(sntp);
         }
-        Err(anyhow::anyhow!("Failed to sync time"))
+        Ok(())
+    }
 
-        // let sntp = EspSntp::new_default()?;
-        // sntp.set_time_sync_enabled(true)?;
-
-
-
+    pub fn get_sntp(&self) -> Option<&EspSntp<'static>> {
+        self.sntp.as_ref()
     }
 }

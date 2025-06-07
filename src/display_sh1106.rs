@@ -15,9 +15,7 @@ use sh1106::{prelude::*, Builder};
 
 // use std::time::SystemTime;
 
-
 // use bit_image
-
 
 pub struct Display {
     display: GraphicsMode<I2cInterface<I2cDriver<'static>>>,
@@ -44,7 +42,11 @@ impl Display {
         Ok(Self { display })
     }
 
-    pub fn print_metadata(&mut self, time: String, totp: String) -> Result<(), ssd1306_i2c::Error> {
+    pub fn print_metadata(
+        &mut self,
+        time: String,
+        totp: String,
+    ) -> Result<(), ssd1306_i2c::Error> {
         self.display.clear();
 
         let text_style = MonoTextStyleBuilder::new()
@@ -57,7 +59,7 @@ impl Display {
             .text_color(BinaryColor::On)
             .build();
 
-        log::info!("Displaying welcome screen");
+        // log::info!("Displaying welcome screen");
         Text::with_baseline(
             &time,
             Point::new(32, 16),
@@ -75,15 +77,15 @@ impl Display {
         .draw(&mut self.display)?;
 
         self.display.flush();
-        FreeRtos::delay_ms(1000);
-
-        self.display.clear();
-        self.display.flush();
 
         Ok(())
     }
 
-    pub fn draw_from_buf(&mut self, buf: &[u8], width: u32) -> Result<(), ssd1306_i2c::Error> {
+    pub fn draw_from_buf(
+        &mut self,
+        buf: &[u8],
+        width: u32,
+    ) -> Result<(), ssd1306_i2c::Error> {
         self.display.clear();
 
         let qr_im: ImageRawLE<BinaryColor> = ImageRawLE::new(buf, width);
@@ -96,21 +98,20 @@ impl Display {
         Ok(())
     }
 
-
     pub fn draw_qr_by_str(
         &mut self,
         qr_str: &str,
     ) -> Result<(), ssd1306_i2c::Error> {
         const scale_factor: usize = 2; // Scale factor for QR code size
 
-        let mut buf = [0u8; 128*scale_factor*scale_factor];
+        let mut buf = [0u8; 128 * scale_factor * scale_factor];
 
         // Process each line of the QR code string
-        for (y, line) in qr_str.lines().take(32*scale_factor).enumerate() {
-            for (x, ch) in line.chars().take(32*scale_factor).enumerate() {
+        for (y, line) in qr_str.lines().take(32 * scale_factor).enumerate() {
+            for (x, ch) in line.chars().take(32 * scale_factor).enumerate() {
                 if ch == '.' {
                     // Set bit at position x in the byte for row y
-                    buf[y * 4*scale_factor + (x / 8)] |= 1 << (7 - (x % 8));
+                    buf[y * 4 * scale_factor + (x / 8)] |= 1 << (7 - (x % 8));
                 }
             }
         }
@@ -130,8 +131,7 @@ impl Display {
             .text_color(BinaryColor::On)
             .build();
 
-
-        // let current_time = 
+        // let current_time =
 
         // let time_str = format!("{}", current_time);
         // Text::with_baseline(
@@ -145,7 +145,6 @@ impl Display {
         self.display.flush();
         Ok(())
     }
-
 
     // pub fn clear(&mut self) -> Result<(), ssd1306_i2c::Error> {
     //     self.display.clear();
