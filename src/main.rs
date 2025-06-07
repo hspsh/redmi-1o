@@ -5,6 +5,7 @@ mod display_sh1106;
 mod qr_generator;
 mod wifi;
 mod bit_image;
+mod buzzer;
 
 use std::time::SystemTime;
 
@@ -46,10 +47,6 @@ fn main() -> Result<()> {
     log::info!("Starting application");
     let peripherals = Peripherals::take().unwrap();
 
-    // Initialize WiFi and connect
-    // let mut wifi_manager = WifiManager::new(peripherals.modem)?;
-    // wifi_manager.connect(WIFI_SSID, WIFI_PASS)?;
-    // wifi_manager.sync_time()?;
 
     let pins = peripherals.pins;
     let sda = pins.gpio8;
@@ -60,7 +57,11 @@ fn main() -> Result<()> {
 
     // Initialize display
     let mut display = display_sh1106::Display::new(i2c_dev).unwrap();
-    display.print_metadata("Zabka esp".to_string(), COMPILE_TIME.to_string()).unwrap();
+    display.print_metadata(WIFI_SSID.to_string(), COMPILE_TIME.to_string()).unwrap();
+
+    // Initialize buzzer and play a single tone
+    let buzzer = buzzer::Buzzer::new(pins.gpio2, peripherals.ledc)?;
+    buzzer.enqueue_tones(&[buzzer::BuzzerTone { freq_hz: 200, duration_ms: 3000 }]);
 
     FreeRtos::delay_ms(1000);
 
@@ -73,7 +74,6 @@ fn main() -> Result<()> {
         let now = Local::now();
         let time_str = now.format("%Y-%m-%d %H:%M:%S").to_string();
         let totp = calculate_totp(&SECRET_HEX).to_string();
-
 
         display.print_metadata( totp,time_str).unwrap();
 
